@@ -6,6 +6,12 @@ public class WebinarService {
     private final List<Webinar> registeredWebinars = new ArrayList<>();
     private final Map<String, List<Participant>> registeredParticipants = new HashMap<>();
 
+    private final EmailSender emailSender;
+
+    public WebinarService(EmailSender emailSender) {
+        this.emailSender = emailSender;
+    }
+
     public void registerParticipant(Participant toRegister, String webinarName) {
         if (!findWebinarWithName(webinarName).isPresent()) {
             throw new IllegalArgumentException(String.format("Webinar with name '%s' does not exist", webinarName));

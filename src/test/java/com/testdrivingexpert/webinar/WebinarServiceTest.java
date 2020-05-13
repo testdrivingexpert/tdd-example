@@ -2,18 +2,26 @@ package com.testdrivingexpert.webinar;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.verify;
 
 public class WebinarServiceTest {
+    @InjectMocks
     private WebinarService tested;
+
+    @Mock
+    private EmailSender emailSenderMock;
 
     @Before
     public void setUp() {
-        tested = new WebinarService();
+        MockitoAnnotations.initMocks(this);
     }
 
     @Test
@@ -90,6 +98,14 @@ public class WebinarServiceTest {
 
         List<Participant> registeredOop = tested.getRegisteredParticipants("oop");
         assertMatchingEmailAddresses(registeredOop, "palo@here.com");
+    }
+
+    @Test
+    public void shouldSendConfirmationEmailToRegisteredParticipant() {
+        givenRegisteredWebinar("oop");
+        whenRegisteringParticipant("palo@here.com", "oop");
+
+        verify(emailSenderMock).sendEmail("palo@here.com", "verify-email-oop");
     }
 
     //////////////////////////////////////////////////////
