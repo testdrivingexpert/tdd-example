@@ -2,6 +2,6 @@ package com.testdrivingexpert.webinar;
 
 public class WebinarService {
     public void registerParticipant(Participant toRegister, String webinarName) {
-        throw new IllegalArgumentException("Webinar with name 'non-existent-webinar' does not exist");
+        throw new IllegalArgumentException(String.format("Webinar with name '%s' does not exist", webinarName));
     }
 }
