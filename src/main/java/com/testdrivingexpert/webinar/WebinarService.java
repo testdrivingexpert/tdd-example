@@ -20,11 +20,15 @@ public class WebinarService {
             throw new IllegalArgumentException(String.format("Webinar with name '%s' does not exist", webinarName));
         }
 
+        String email = toRegister.getEmail();
+
         List<Participant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
-        participants.add(toRegister);
+        if (!isRegisteredParticipant(email, participants)) {
+            participants.add(toRegister);
+        }
 
         Map<String, String> parameters = Collections.singletonMap("token", String.valueOf(secureRandom.nextLong()));
-        emailSender.sendEmail(toRegister.getEmail(), "verify-email-" + webinarName, parameters);
+        emailSender.sendEmail(email, "verify-email-" + webinarName, parameters);
     }
 
     public void registerWebinar(Webinar toRegister) {
@@ -44,5 +48,9 @@ public class WebinarService {
         return registeredWebinars.stream()
                 .filter(webinar -> webinar.getName().equals(webinarName))
                 .findFirst();
+    }
+
+    private boolean isRegisteredParticipant(String email, List<Participant> participants) {
+        return participants.stream().anyMatch(participant -> participant.getEmail().equals(email));
     }
 }
