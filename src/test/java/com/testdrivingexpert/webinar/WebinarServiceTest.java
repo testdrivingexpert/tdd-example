@@ -21,4 +21,13 @@ public class WebinarServiceTest {
         .isInstanceOf(IllegalArgumentException.class)
         .hasMessage("Webinar with name 'non-existent-webinar' does not exist");
     }
+
+    @Test
+    public void shouldRefuseToRegisterParticipantForWrongWebinar_case2() {
+        Participant participant = new Participant("my@email.com");
+
+        assertThatThrownBy(() -> tested.registerParticipant(participant, "maybe-this-one"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Webinar with name 'maybe-this-one' does not exist");
+    }
 }
