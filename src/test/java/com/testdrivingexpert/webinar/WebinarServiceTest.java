@@ -36,16 +36,44 @@ public class WebinarServiceTest {
     
     @Test
     public void shouldAllowToRegisterWebinarAndRegisterParticipant() {
-        Webinar webinar = new Webinar("tdd");
-        tested.registerWebinar(webinar);
+        givenRegisteredWebinar("tdd");
 
         Participant participant = new Participant("my@email.com");
         tested.registerParticipant(participant, "tdd");
 
         List<Participant> registered = tested.getRegisteredParticipants();
+        assertMatchingEmailAddresses(registered, "my@email.com");
+    }
+
+    @Test
+    public void shouldAllowRegisteringMultipleParticipants() {
+        String webinarName = "tdd";
+        givenRegisteredWebinar(webinarName);
+
+        whenRegisteringParticipant("my@email.com", webinarName);
+        whenRegisteringParticipant("john@yahoo.com", webinarName);
+
+        List<Participant> registered = tested.getRegisteredParticipants();
+        assertMatchingEmailAddresses(registered, "my@email.com", "john@yahoo.com");
+
+    }
+
+
+    //////////////////////////////////////////////////////
+    private void givenRegisteredWebinar(String webinarName) {
+        Webinar webinar = new Webinar(webinarName);
+        tested.registerWebinar(webinar);
+    }
+
+    private void whenRegisteringParticipant(String email, String webinarName) {
+        Participant participant = new Participant(email);
+        tested.registerParticipant(participant, webinarName);
+    }
+
+    private void assertMatchingEmailAddresses(List<Participant> registered, String... emails) {
         assertThat(registered)
                 .isNotEmpty()
                 .extracting("email")
-                .containsExactly("my@email.com");
+                .containsExactly(emails);
     }
 }
