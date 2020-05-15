@@ -1,25 +1,31 @@
 package com.testdrivingexpert.webinar;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class WebinarService {
-    private Webinar registeredWebinar;
-    private List<Participant> registeredParticipants = new ArrayList<>();
+    private final List<Webinar> registeredWebinars = new ArrayList<>();
+    private final Map<String, List<Participant>> registeredParticipants = new HashMap<>();
 
     public void registerParticipant(Participant toRegister, String webinarName) {
-        if (registeredWebinar == null || !registeredWebinar.getName().equals(webinarName)) {
+        if (!findWebinarWithName(webinarName).isPresent()) {
             throw new IllegalArgumentException(String.format("Webinar with name '%s' does not exist", webinarName));
         }
 
-        registeredParticipants.add(toRegister);
+        List<Participant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
+        participants.add(toRegister);
     }
 
     public void registerWebinar(Webinar toRegister) {
-        registeredWebinar = toRegister;
+        registeredWebinars.add(toRegister);
     }
 
     public List<Participant> getRegisteredParticipants(String webinarName) {
-        return new ArrayList<>(registeredParticipants);
+        return new ArrayList<>(registeredParticipants.get(webinarName));
+    }
+
+    private Optional<Webinar> findWebinarWithName(String webinarName) {
+        return registeredWebinars.stream()
+                .filter(webinar -> webinar.getName().equals(webinarName))
+                .findFirst();
     }
 }
