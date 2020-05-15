@@ -1,18 +1,18 @@
 package com.testdrivingexpert.webinar;
 
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 
 public class WebinarService {
     private Webinar registeredWebinar;
-    private Participant registeredParticipant;
+    private List<Participant> registeredParticipants = new ArrayList<>();
 
     public void registerParticipant(Participant toRegister, String webinarName) {
         if (registeredWebinar == null || !registeredWebinar.getName().equals(webinarName)) {
             throw new IllegalArgumentException(String.format("Webinar with name '%s' does not exist", webinarName));
         }
 
-        registeredParticipant = toRegister;
+        registeredParticipants.add(toRegister);
     }
 
     public void registerWebinar(Webinar toRegister) {
@@ -20,6 +20,6 @@ public class WebinarService {
     }
 
     public List<Participant> getRegisteredParticipants() {
-        return Collections.singletonList(registeredParticipant);
+        return new ArrayList<>(registeredParticipants);
     }
 }
