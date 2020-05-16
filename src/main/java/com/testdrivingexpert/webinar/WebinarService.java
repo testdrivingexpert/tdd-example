@@ -58,13 +58,7 @@ public class WebinarService {
     }
 
     public void confirmEmail(String email, String token, String webinarName) {
-        List<RegisteredParticipant> participants = registeredParticipants.get(webinarName);
-        if (participants == null) {
-            throw new InvalidTokenException();
-        }
-        RegisteredParticipant found = participants.stream()
-                .filter(participant -> participant.getEmail().equals(email))
-                .findFirst()
+        RegisteredParticipant found = findParticipantByWebinarAndEmail(webinarName, email)
                 .orElseThrow(InvalidTokenException::new);
 
         if (!found.getToken().equals(token)) {
@@ -73,5 +67,15 @@ public class WebinarService {
 
         Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
         emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
+    }
+
+    private Optional<RegisteredParticipant> findParticipantByWebinarAndEmail(String webinarName, String email) {
+        List<RegisteredParticipant> participants = registeredParticipants.get(webinarName);
+        if (participants == null) {
+            return Optional.empty();
+        }
+        return participants.stream()
+                .filter(participant -> participant.getEmail().equals(email))
+                .findFirst();
     }
 }
