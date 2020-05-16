@@ -34,8 +34,8 @@ public class WebinarServiceTest {
         Participant participant = new Participant("my@email.com");
 
         assertThatThrownBy(() -> tested.registerParticipant(participant, "non-existent-webinar"))
-        .isInstanceOf(IllegalArgumentException.class)
-        .hasMessage("Webinar with name 'non-existent-webinar' does not exist");
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Webinar with name 'non-existent-webinar' does not exist");
     }
 
     @Test
@@ -169,6 +169,17 @@ public class WebinarServiceTest {
         givenRegisteredParticipant("anybody@mail.com", "tdd");
 
         assertThatThrownBy(() -> tested.confirmEmail("peter@yahoo.com", "token", "tdd"))
+                .isInstanceOf(InvalidTokenException.class);
+
+        assertThankYouMailIsNotSent();
+    }
+
+    @Test
+    public void shouldRejectInvalidTokenConfirmation() {
+        givenRegisteredWebinar("tdd");
+        givenRegisteredParticipant("peter@yahoo.com", "tdd");
+
+        assertThatThrownBy(() -> tested.confirmEmail("peter@yahoo.com", "BAD_TOKEN", "tdd"))
                 .isInstanceOf(InvalidTokenException.class);
 
         assertThankYouMailIsNotSent();
