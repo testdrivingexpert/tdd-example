@@ -55,6 +55,10 @@ public class WebinarService {
     }
 
     public void confirmEmail(String email, String token, String webinarName) {
+        List<Participant> participants = registeredParticipants.get(webinarName);
+        if (participants == null) {
+            throw new InvalidTokenException();
+        }
         Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
         emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
     }
