@@ -65,6 +65,7 @@ public class WebinarService {
             throw new InvalidTokenException();
         }
 
+        found.setEmailConfirmed(true);
         Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
         emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
     }
@@ -80,6 +81,9 @@ public class WebinarService {
     }
 
     public void sendEmailAboutWebinarStarting(String webinarName) {
-
+        Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
+        registeredParticipants.get(webinarName).stream()
+                .filter(RegisteredParticipant::isEmailConfirmed)
+                .forEach(p -> emailSender.sendEmail(p.getEmail(), "webinar-starts", parameters));
     }
 }
