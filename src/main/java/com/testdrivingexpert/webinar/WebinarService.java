@@ -59,6 +59,11 @@ public class WebinarService {
         if (participants == null) {
             throw new InvalidTokenException();
         }
+        participants.stream()
+                .filter(participant -> participant.getEmail().equals(email))
+                .findFirst()
+                .orElseThrow(InvalidTokenException::new);
+
         Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
         emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
     }
