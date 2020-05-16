@@ -2,10 +2,11 @@ package com.testdrivingexpert.webinar;
 
 import java.security.SecureRandom;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WebinarService {
     private final List<Webinar> registeredWebinars = new ArrayList<>();
-    private final Map<String, List<Participant>> registeredParticipants = new HashMap<>();
+    private final Map<String, List<RegisteredParticipant>> registeredParticipants = new HashMap<>();
 
     private final EmailSender emailSender;
 
@@ -21,13 +22,14 @@ public class WebinarService {
         }
 
         String email = toRegister.getEmail();
+        String token = String.valueOf(secureRandom.nextLong());
 
-        List<Participant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
+        List<RegisteredParticipant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
         if (!isRegisteredParticipant(email, participants)) {
-            participants.add(toRegister);
+            participants.add(new RegisteredParticipant(toRegister, token));
         }
 
-        Map<String, String> parameters = Collections.singletonMap("token", String.valueOf(secureRandom.nextLong()));
+        Map<String, String> parameters = Collections.singletonMap("token", token);
         emailSender.sendEmail(email, "verify-email-" + webinarName, parameters);
     }
 
@@ -41,7 +43,8 @@ public class WebinarService {
     }
 
     public List<Participant> getRegisteredParticipants(String webinarName) {
-        return new ArrayList<>(registeredParticipants.get(webinarName));
+        return registeredParticipants.get(webinarName).stream()
+                .map(RegisteredParticipant::getParticipant).collect(Collectors.toList());
     }
 
     private Optional<Webinar> findWebinarWithName(String webinarName) {
@@ -50,19 +53,23 @@ public class WebinarService {
                 .findFirst();
     }
 
-    private boolean isRegisteredParticipant(String email, List<Participant> participants) {
+    private boolean isRegisteredParticipant(String email, List<RegisteredParticipant> participants) {
         return participants.stream().anyMatch(participant -> participant.getEmail().equals(email));
     }
 
     public void confirmEmail(String email, String token, String webinarName) {
-        List<Participant> participants = registeredParticipants.get(webinarName);
+        List<RegisteredParticipant> participants = registeredParticipants.get(webinarName);
         if (participants == null) {
             throw new InvalidTokenException();
         }
-        participants.stream()
+        RegisteredParticipant found = participants.stream()
                 .filter(participant -> participant.getEmail().equals(email))
                 .findFirst()
                 .orElseThrow(InvalidTokenException::new);
+
+        if (!found.getToken().equals(token)) {
+            throw new InvalidTokenException();
+        }
 
         Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
         emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
