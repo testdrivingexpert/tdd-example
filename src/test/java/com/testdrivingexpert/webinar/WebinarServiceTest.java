@@ -41,7 +41,7 @@ public class WebinarServiceTest {
         Participant participant = new Participant("my@email.com");
         tested.registerParticipant(participant, "tdd");
 
-        List<Participant> registered = tested.getRegisteredParticipants();
+        List<Participant> registered = tested.getRegisteredParticipants("tdd");
         assertMatchingEmailAddresses(registered, "my@email.com");
     }
 
@@ -53,11 +53,24 @@ public class WebinarServiceTest {
         whenRegisteringParticipant("my@email.com", webinarName);
         whenRegisteringParticipant("john@yahoo.com", webinarName);
 
-        List<Participant> registered = tested.getRegisteredParticipants();
+        List<Participant> registered = tested.getRegisteredParticipants(webinarName);
         assertMatchingEmailAddresses(registered, "my@email.com", "john@yahoo.com");
-
     }
 
+    @Test
+    public void shouldAllowRegisteringMultipleWebinarsWithUniqueNames() {
+        givenRegisteredWebinar("tdd");
+        givenRegisteredWebinar("oop");
+
+        whenRegisteringParticipant("my@email.com", "tdd");
+        whenRegisteringParticipant("john@yahoo.com", "oop");
+
+        List<Participant> registeredTdd = tested.getRegisteredParticipants("tdd");
+        assertMatchingEmailAddresses(registeredTdd, "my@email.com");
+
+        List<Participant> registeredOop = tested.getRegisteredParticipants("oop");
+        assertMatchingEmailAddresses(registeredOop, "john@yahoo.com");
+    }
 
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {

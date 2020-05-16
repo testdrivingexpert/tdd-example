@@ -19,7 +19,7 @@ public class WebinarService {
         registeredWebinar = toRegister;
     }
 
-    public List<Participant> getRegisteredParticipants() {
+    public List<Participant> getRegisteredParticipants(String webinarName) {
         return new ArrayList<>(registeredParticipants);
     }
 }
