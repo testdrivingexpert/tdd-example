@@ -160,9 +160,20 @@ public class WebinarServiceTest {
         assertThatThrownBy(() -> tested.confirmEmail("peter@yahoo.com", token, "BAD_WEBINAR"))
                 .isInstanceOf(InvalidTokenException.class);
 
-        verify(emailSenderMock, never()).sendEmail(any(), startsWith("thank-you-"), any());
+        assertThankYouMailIsNotSent();
     }
-    
+
+    @Test
+    public void shouldRefuseUnregisteredParticipantWhenConfirming() {
+        givenRegisteredWebinar("tdd");
+        givenRegisteredParticipant("anybody@mail.com", "tdd");
+
+        assertThatThrownBy(() -> tested.confirmEmail("peter@yahoo.com", "token", "tdd"))
+                .isInstanceOf(InvalidTokenException.class);
+
+        assertThankYouMailIsNotSent();
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
@@ -200,5 +211,9 @@ public class WebinarServiceTest {
         String value = emailParametersCaptor.getValue().get(name);
         assertNotNull("Parameter " + name + " not found in email parameters", value);
         assertEquals("Invalid value of parameter " + name, expectedValue, value);
+    }
+
+    private void assertThankYouMailIsNotSent() {
+        verify(emailSenderMock, never()).sendEmail(any(), startsWith("thank-you-"), any());
     }
 }
