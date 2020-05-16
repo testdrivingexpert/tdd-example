@@ -55,6 +55,7 @@ public class WebinarService {
     }
 
     public void confirmEmail(String email, String token, String webinarName) {
-
+        Map<String, String> parameters = Collections.singletonMap("webinarName", webinarName);
+        emailSender.sendEmail(email, "thank-you-" + webinarName, parameters);
     }
 }
