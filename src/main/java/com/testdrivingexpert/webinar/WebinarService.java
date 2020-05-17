@@ -1,5 +1,6 @@
 package com.testdrivingexpert.webinar;
 
+import java.security.SecureRandom;
 import java.util.*;
 
 public class WebinarService {
@@ -7,6 +8,8 @@ public class WebinarService {
     private final Map<String, List<Participant>> registeredParticipants = new HashMap<>();
 
     private final EmailSender emailSender;
+
+    private final SecureRandom secureRandom = new SecureRandom();
 
     public WebinarService(EmailSender emailSender) {
         this.emailSender = emailSender;
@@ -20,7 +23,8 @@ public class WebinarService {
         List<Participant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
         participants.add(toRegister);
 
-        emailSender.sendEmail(toRegister.getEmail(), "verify-email-" + webinarName, new HashMap<>());
+        Map<String, String> parameters = Collections.singletonMap("token", String.valueOf(secureRandom.nextLong()));
+        emailSender.sendEmail(toRegister.getEmail(), "verify-email-" + webinarName, parameters);
     }
 
     public void registerWebinar(Webinar toRegister) {
