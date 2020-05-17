@@ -20,7 +20,7 @@ public class WebinarService {
         List<Participant> participants = registeredParticipants.computeIfAbsent(webinarName, s -> new ArrayList<>());
         participants.add(toRegister);
 
-        emailSender.sendEmail(toRegister.getEmail(), "verify-email-" + webinarName);
+        emailSender.sendEmail(toRegister.getEmail(), "verify-email-" + webinarName, new HashMap<>());
     }
 
     public void registerWebinar(Webinar toRegister) {
