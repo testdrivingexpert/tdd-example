@@ -185,6 +185,25 @@ public class WebinarServiceTest {
         assertThankYouMailIsNotSent();
     }
 
+    @Test
+    public void shouldSendEmailToAllParticipantsBeforeWebinarStarts() {
+        String webinarName = "interestingWebinar";
+
+        givenRegisteredWebinar(webinarName);
+        givenRegisteredParticipant("a@a.com", webinarName);
+        givenRegisteredParticipant("b@b.com", webinarName);
+        givenRegisteredParticipant("c@c.com", webinarName);
+
+        givenParticipantConfirmedEmailForWebinar("a@a.com", webinarName);
+        givenParticipantConfirmedEmailForWebinar("c@c.com", webinarName);
+
+        tested.sendEmailAboutWebinarStarting(webinarName);
+
+        assertWebinarStartsSentTo(webinarName, "a@a.com");
+        assertWebinarStartsWasNotSentTo("b@b.com");
+        assertWebinarStartsSentTo(webinarName, "c@c.com");
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
@@ -211,6 +230,11 @@ public class WebinarServiceTest {
         return token;
     }
 
+    private void givenParticipantConfirmedEmailForWebinar(String email, String webinarName) {
+        String token = assertTokenWasSentToParticipant(email, webinarName);
+        tested.confirmEmail(email, token, webinarName);
+    }
+
     private void assertMatchingEmailAddresses(List<Participant> registered, String... emails) {
         assertThat(registered)
                 .isNotEmpty()
@@ -227,4 +251,14 @@ public class WebinarServiceTest {
     private void assertThankYouMailIsNotSent() {
         verify(emailSenderMock, never()).sendEmail(any(), startsWith("thank-you-"), any());
     }
+
+    private void assertWebinarStartsSentTo(String webinarName, String expectedEmailAddress) {
+         verify(emailSenderMock).sendEmail(eq(expectedEmailAddress), eq("webinar-starts"), emailParametersCaptor.capture());
+         Map<String, String> captured = emailParametersCaptor.getValue();
+         assertEquals("Invalid webinarNameInEmail", webinarName, captured.get("webinarName"));
+     }
+
+     private void assertWebinarStartsWasNotSentTo(String expectedEmailAddress) {
+         verify(emailSenderMock, never()).sendEmail(eq(expectedEmailAddress), eq("webinar-starts"), any());
+     }
 }

@@ -78,4 +78,8 @@ public class WebinarService {
                 .filter(participant -> participant.getEmail().equals(email))
                 .findFirst();
     }
+
+    public void sendEmailAboutWebinarStarting(String webinarName) {
+
+    }
 }
