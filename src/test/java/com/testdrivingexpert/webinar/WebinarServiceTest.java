@@ -81,16 +81,31 @@ public class WebinarServiceTest {
                 .hasMessage("Duplicate webinar with name 'tdd'");
     }
 
+    @Test
+    public void shouldNotDeleteExistingParticipantsAfterDuplicateRegisteringOfSameWebinar() {
+        givenRegisteredWebinar("oop");
+        givenRegisteredParticipant("palo@here.com", "oop");
+
+        assertThatThrownBy(() -> whenRegisteringWebinar("oop"));
+
+        List<Participant> registeredOop = tested.getRegisteredParticipants("oop");
+        assertMatchingEmailAddresses(registeredOop, "palo@here.com");
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
         tested.registerWebinar(webinar);
     }
 
+    private void givenRegisteredParticipant(String email, String webinarName) {
+        whenRegisteringParticipant(email, webinarName);
+    }
+
     private void whenRegisteringWebinar(String webinarName) {
         givenRegisteredWebinar(webinarName);
     }
-
+    
     private void whenRegisteringParticipant(String email, String webinarName) {
         Participant participant = new Participant(email);
         tested.registerParticipant(participant, webinarName);
