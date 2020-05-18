@@ -16,6 +16,11 @@ public class WebinarService {
     }
 
     public void registerWebinar(Webinar toRegister) {
+        String name = toRegister.getName();
+
+        if (findWebinarWithName(name).isPresent()) {
+            throw new IllegalArgumentException(String.format("Duplicate webinar with name '%s'", name));
+        }
         registeredWebinars.add(toRegister);
     }
 
