@@ -53,4 +53,8 @@ public class WebinarService {
     private boolean isRegisteredParticipant(String email, List<Participant> participants) {
         return participants.stream().anyMatch(participant -> participant.getEmail().equals(email));
     }
+
+    public void confirmEmail(String email, String token, String webinarName) {
+
+    }
 }

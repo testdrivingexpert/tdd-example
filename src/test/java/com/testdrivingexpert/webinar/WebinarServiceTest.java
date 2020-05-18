@@ -139,6 +139,18 @@ public class WebinarServiceTest {
         assertThat(registered).hasSize(1);
     }
 
+    @Test
+    public void shouldSendThankYouEmailAfterConfirmingEmailAddress() {
+        givenRegisteredWebinar("tdd");
+        givenRegisteredParticipant("peter@yahoo.com", "tdd");
+        String token = assertTokenWasSentToParticipant("peter@yahoo.com", "tdd");
+
+        tested.confirmEmail("peter@yahoo.com", token, "tdd");
+
+        verify(emailSenderMock).sendEmail(eq("peter@yahoo.com"), eq("thank-you-tdd"), emailParametersCaptor.capture());
+        assertEmailParameterValue("webinarName", "tdd");
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
@@ -170,5 +182,11 @@ public class WebinarServiceTest {
                 .isNotEmpty()
                 .extracting("email")
                 .containsExactly(emails);
+    }
+
+    private void assertEmailParameterValue(String name, String expectedValue) {
+        String value = emailParametersCaptor.getValue().get(name);
+        assertNotNull("Parameter " + name + " not found in email parameters", value);
+        assertEquals("Invalid value of parameter " + name, expectedValue, value);
     }
 }
