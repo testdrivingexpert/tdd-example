@@ -151,6 +151,18 @@ public class WebinarServiceTest {
         assertEmailParameterValue("webinarName", "tdd");
     }
 
+    @Test
+    public void shouldRefuseUnknownWebinarWhenConfirming() {
+        givenRegisteredWebinar("tdd");
+        givenRegisteredParticipant("peter@yahoo.com", "tdd");
+        String token = assertTokenWasSentToParticipant("peter@yahoo.com", "tdd");
+
+        assertThatThrownBy(() -> tested.confirmEmail("peter@yahoo.com", token, "BAD_WEBINAR"))
+                .isInstanceOf(InvalidTokenException.class);
+
+        verify(emailSenderMock, never()).sendEmail(any(), startsWith("thank-you-"), any());
+    }
+    
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
