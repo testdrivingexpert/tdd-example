@@ -1,19 +1,18 @@
 package com.testdrivingexpert.webinar;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.*;
 
 public class WebinarServiceTest {
     @InjectMocks
@@ -21,6 +20,9 @@ public class WebinarServiceTest {
 
     @Mock
     private EmailSender emailSenderMock;
+
+    @Captor
+    private ArgumentCaptor<Map<String, String>> emailParametersCaptor;
 
     @Before
     public void setUp() {
@@ -44,7 +46,7 @@ public class WebinarServiceTest {
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Webinar with name 'maybe-this-one' does not exist");
     }
-    
+
     @Test
     public void shouldAllowToRegisterWebinarAndRegisterParticipant() {
         givenRegisteredWebinar("tdd");
@@ -112,11 +114,18 @@ public class WebinarServiceTest {
     }
 
     @Test
-    @Ignore
     public void shouldSendEmailTwiceWhenUserRegisters2ndTimeWithDifferentToken() {
         givenRegisteredWebinar("oop");
+
         whenRegisteringParticipant("palo@here.com", "oop");
+        String token1 = assertTokenWasSentToParticipant("palo@here.com", "oop");
+
+        reset(emailSenderMock);
+
         whenRegisteringParticipant("palo@here.com", "oop");
+        String token2 = assertTokenWasSentToParticipant("palo@here.com", "oop");
+
+        assertNotEquals("Token should be different", token1, token2);
     }
 
     //////////////////////////////////////////////////////
@@ -136,6 +145,13 @@ public class WebinarServiceTest {
     private void whenRegisteringParticipant(String email, String webinarName) {
         Participant participant = new Participant(email);
         tested.registerParticipant(participant, webinarName);
+    }
+
+    private String assertTokenWasSentToParticipant(String email, String webinarName) {
+        verify(emailSenderMock).sendEmail(eq(email), eq("verify-email-" + webinarName), emailParametersCaptor.capture());
+        String token = emailParametersCaptor.getValue().get("token");
+        assertNotNull("Token was not sent by email", token);
+        return token;
     }
 
     private void assertMatchingEmailAddresses(List<Participant> registered, String... emails) {
