@@ -72,10 +72,23 @@ public class WebinarServiceTest {
         assertMatchingEmailAddresses(registeredOop, "john@yahoo.com");
     }
 
+    @Test
+    public void shouldRefuseRegisteringTwoWebinarsWithTheSameName() {
+        givenRegisteredWebinar("tdd");
+
+        assertThatThrownBy(() -> whenRegisteringWebinar("tdd"))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Duplicate webinar with name 'tdd'");
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
         tested.registerWebinar(webinar);
+    }
+
+    private void whenRegisteringWebinar(String webinarName) {
+        givenRegisteredWebinar(webinarName);
     }
 
     private void whenRegisteringParticipant(String email, String webinarName) {
