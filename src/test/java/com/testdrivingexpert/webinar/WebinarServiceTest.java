@@ -128,6 +128,17 @@ public class WebinarServiceTest {
         assertNotEquals("Token should be different", token1, token2);
     }
 
+    @Test
+    public void shouldNotRememberParticipantTwiceWhenResendingEmail() {
+        givenRegisteredWebinar("java");
+        givenRegisteredParticipant("suzy@mail.com", "java");
+
+        whenRegisteringParticipant("suzy@mail.com", "java");
+
+        List<Participant> registered = tested.getRegisteredParticipants("java");
+        assertThat(registered).hasSize(1);
+    }
+
     //////////////////////////////////////////////////////
     private void givenRegisteredWebinar(String webinarName) {
         Webinar webinar = new Webinar(webinarName);
